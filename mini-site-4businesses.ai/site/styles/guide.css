@@ -307,6 +307,46 @@ a {
   margin: 0 0 3.5rem;
 }
 
+.case-tabs:not([hidden]) {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.case-tabs button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.6rem clamp(0.3rem, 2vw, 1.05rem);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: var(--bg);
+  color: var(--mute);
+  font: 600 0.9rem/1.4 var(--font-ui);
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.case-tabs button + button {
+  border-inline-start: 1px solid var(--line);
+}
+
+.case-tabs button:hover,
+.case-tabs button[aria-selected="true"] {
+  background: var(--bg-elevated);
+  color: var(--ink);
+}
+
+.case-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--ink);
+}
+
+.case-tabs button:focus-visible,
+.case [role="tabpanel"]:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
 .case-block {
   border: 1.5px solid var(--line-strong);
   background: var(--bg-elevated);
@@ -364,6 +404,38 @@ a {
   line-height: 1.75;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+.case-code code {
+  font-family: var(--font-mono);
+}
+
+.case-build {
+  margin: 1.5rem 0;
+  padding-block: 1.15rem;
+  border-block: 1px solid var(--line);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.case-build h3 {
+  margin: 1rem 0 0.35rem;
+  font: 600 0.95rem/1.4 var(--font-ui);
+}
+
+.case-build :is(ul, ol) {
+  margin: 0;
+  padding-inline-start: 1.4rem;
+}
+
+.case-build li + li {
+  margin-top: 0.4rem;
+}
+
+.case-build code {
+  font: 0.9em var(--font-mono);
+  background: var(--fill);
+  padding: 0.1em 0.25em;
 }
 
 .qr-block {

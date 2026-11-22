@@ -118,7 +118,58 @@
     });
   }
 
+  function wireCaseTabs(tabList) {
+    var tabs = tabList.querySelectorAll('[role="tab"]');
+    var section = tabList.parentNode;
+    var panels = [];
+    var selectedIndex = 0;
+    if (!tabs.length) return;
+
+    for (var i = 0; i < tabs.length; i++) {
+      var panel = document.getElementById(tabs[i].getAttribute("aria-controls"));
+      if (!panel || panel.parentNode !== section) return;
+      panels.push(panel);
+      if (tabs[i].getAttribute("aria-selected") === "true") selectedIndex = i;
+    }
+
+    function selectTab(index) {
+      for (var j = 0; j < tabs.length; j++) {
+        var selected = j === index;
+        tabs[j].setAttribute("aria-selected", selected ? "true" : "false");
+        tabs[j].tabIndex = selected ? 0 : -1;
+        panels[j].hidden = !selected;
+      }
+    }
+
+    function wireTab(tab, index) {
+      tab.addEventListener("click", function () {
+        selectTab(index);
+      });
+
+      tab.addEventListener("keydown", function (event) {
+        var next;
+        switch (event.key) {
+          case "ArrowLeft": next = (index + tabs.length - 1) % tabs.length; break;
+          case "ArrowRight": next = (index + 1) % tabs.length; break;
+          case "Home": next = 0; break;
+          case "End": next = tabs.length - 1; break;
+          default: return;
+        }
+        event.preventDefault();
+        selectTab(next);
+        tabs[next].focus();
+      });
+    }
+
+    for (var k = 0; k < tabs.length; k++) wireTab(tabs[k], k);
+    selectTab(selectedIndex);
+    tabList.hidden = false;
+  }
+
   wirePromptButton();
+
+  var caseTabs = document.querySelector(".case-tabs");
+  if (caseTabs) wireCaseTabs(caseTabs);
 
   var caseBlocks = document.querySelectorAll(".case-block");
   for (var i = 0; i < caseBlocks.length; i++) {

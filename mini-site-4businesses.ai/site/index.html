@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI that WOKRS!</title>
+  <link rel="stylesheet" href="styles/guide.css?v=case-build-1">
+</head>
+<body>
+  <a class="skip-link" href="#content">跳到指南正文</a>
+  <div class="guide-shell">
+    <main class="guide-main" id="content">
+      <article class="guide">
+        <header class="hero">
+          <h1 class="sr-heading">AI that WOKRS!</h1>
+          <img class="title-image" src="images/title.png" alt="AI that WOKRS!" width="534" height="176">
+          <p class="subtitle">Build AI agents for business!</p>
+        </header>
+
+        <nav class="links" aria-label="Workshop 链接">
+          <p class="resource-row">
+            <a class="resource-link" href="https://www.workbuddy.cn/" target="_blank" rel="noopener noreferrer">下载 WorkBuddy</a>
+          </p>
+          <p class="resource-row">
+            <a class="resource-link" href="https://www.workbuddy.cn/work/launch/?sharecode=WL50YRqgFUOChF9VZR8gn3mBIjeOgfTsm6jkQ3M7QdypGsXwygV4oF22j3dSsmxa&amp;expertname=%E6%99%BA%E8%83%BD%E4%BD%93%E8%AE%BE%E8%AE%A1%E5%B8%88Ethan&amp;buddy_type=workbuddy">点击本链接，在 WorkBuddy 中安装 “智能体设计师Ethan”本地专家</a>
+          </p>
+          <p class="resource-row">
+            <a class="resource-link" href="https://www.workbuddy.cn/share/asset?extra_from=&amp;resource_type=link&amp;shareCode=cs261120YEt6oSuKYFvQvSUPiEp6aw&amp;share_way=link&amp;sig=TDsAAPadhbJnfrZW">点击本链接，在 WorkBuddy 中安装技能 “research-ops”</a>
+          </p>
+          <p class="resource-row">
+            <a class="resource-link" href="https://www.workbuddy.cn/share/asset?extra_from=&amp;resource_type=link&amp;shareCode=cs261121zGh6w5YViBXMuhZMK9jCFT&amp;share_way=link&amp;sig=yu69na5LsTDGYhjc">点击本链接，在 WorkBuddy 中安装技能 “mcp-expert”</a>
+          </p>
+          <p class="resource-row">
+            <a class="resource-link" href="https://www.workbuddy.cn/share/asset?extra_from=&amp;resource_type=link&amp;shareCode=cs261121cqBPxOFQsgQMmYZ4o6Qknj&amp;share_way=link&amp;sig=EZaabjQzccLHwADo">点击本链接，在 WorkBuddy 中安装技能 “rag-expert”</a>
+          </p>
+          <p class="resource-row">
+            <a class="resource-link" href="https://hedgedoc.pro/4GvM0uihT2-1sbRFag2Y_w?edit" target="_blank" rel="noopener noreferrer">今天 Workshop 的提示词共享文档</a>
+          </p>
+        </nav>
+
+        <section class="case" aria-label="练习案例">
+          <div class="case-tabs" role="tablist" aria-label="练习案例" hidden>
+            <button id="lab-tab" type="button" role="tab" aria-selected="true" aria-controls="lab-panel">实验室设备预约智能体</button>
+            <button id="lean-tab" type="button" role="tab" aria-selected="false" aria-controls="lean-panel" tabindex="-1">精益百科专家智能体</button>
+            <button id="materials-tab" type="button" role="tab" aria-selected="false" aria-controls="materials-panel" tabindex="-1">关键物料缺料预警智能体</button>
+          </div>
+          <div id="lab-panel" role="tabpanel" aria-labelledby="lab-tab" tabindex="0">
+            <div class="case-block">
+              <div class="case-bar">
+                <h2 class="case-title">智能体需求</h2>
+                <button class="case-copy" type="button">复制</button>
+              </div>
+              <div class="case-text"># 实验室设备预约：本地专家
+## 使用入口
+`lab-mgmt-expert` 安装到个人版 WorkBuddy 的「我的专家」，显示名为「实验室设备助理」。试用版不另外登录或验证身份，预约时从人员名单里选人。
+- 电脑：在 WorkBuddy 里选「实验室设备助理」。
+- 微信：用自己的微信绑定个人版 WorkBuddy「助理」。能否持续调用这个本地专家，还要实测。
+- 电脑和微信用同一份本地台账。本地专家和企业智能体用同一套数据结构，各自保存数据，预约不互通。
+## 数据
+设备、人员、预约台账和模板随 `lab-mgmt-expert` 一起打包。电脑和微信都指向专家服务目录下同一份台账。升级时保留已有设备、人员和预约数据，不用包内初始文件覆盖。
+| `lab-mgmt-expert/data/` 下的文件 | 记录的数据 |
+| --- | --- |
+| `lab-equipments.json` | 初始 50 台模拟设备。每台一条，同名设备分开记。字段有设备编号、名称、类别、用途、位置和运行状态，不设数量字段。 |
+| `people.json` | 初始 50 人。每人一条，记录人员编号、中文姓名、英文名（`english_name`）、部门、岗位、工号和邮箱。`lab_admin` 标记实验室管理员。测试邮箱统一用 `firstname@ethanhuang.com`，`firstname` 为小写英文名。 |
+| `reservations.json` | 每笔预约一条，记录预约编号、设备编号、人员编号、起止日期和时段、状态及选填用途。有变动就更新。 |
+| `lab-mgmt-expert/templates/` 下的文件 | 记录的数据和展示方式 |
+| --- | --- |
+| `reservation-list.md` | 预约编号、设备名称和编号、预约人和部门、起止日期和时段、状态。电脑上用表格，微信里用短列表。 |
+| `reservation-form.md` | 电脑上用表格，微信里用短列表。设备、预约人、起止日期和时段必填，用途选填。填过的用途写入 `reservations.json`，在预约详情里显示。 |
+## 专家职责
+1. **查设备空闲**：按设备名和日期查，设备名可只输一部分。未给日期时查从今天起的 7 天。匹配多台时，列出名称、编号和位置，让用户选一台再显示空闲时段。查询不创建预约。只有上一轮明确问过是否预约，用户回复“要”才进入预约流程。
+2. **查预约单**：按设备名、预约人姓名、部门、岗位或预约编号查，支持模糊匹配。查到多笔时，让用户选一笔再看详情。
+3. **预约**：选定设备、预约人和时段，缺什么就问什么。同名人员列出部门和工号，让用户选。只订在役设备尚未开始且没被占用的时段。维护中或停用的设备不能订。时段冲突时，列出其他空闲时段或同名设备，不自行替换。
+4. **修改和取消**：优先按预约编号找，无编号时按预约人或设备查。查到多笔就让用户选。只修改或取消尚未开始且未取消的预约。修改只涉及日期和时段，沿用原编号，查冲突时排除原预约。修改校验通过就更新，即使新旧时段相同也照常更新和通知。改不了就保留原预约。取消后保留记录并释放时段。已取消的预约可查、不可改，再次取消时提示“已取消”，不发邮件。
+5. **邮件通知**：新建、修改或取消成功后，通知预约人和所有实验室管理员，同一邮箱只发一封。邮件写明操作、预约编号、设备、预约人和时段。修改通知列出修改前后的时段。没有管理员时仍通知预约人，并在聊天里说明。发送失败就在聊天里说明，不补发，不撤销预约。试用版只向 `ethanhuang.com` 下的测试邮箱发送通知。
+## 规则：时段和重复提交
+- 按北京时间订上午、下午或全天，不区分工作日、周末和节假日。跨日预约连续占用首尾之间的所有半天，首尾也算在内。有一个半天不能订，整笔就不保存。
+- 上午从 09:00 开始，下午从 13:00 开始。用第一个半天判断预约是否已经开始。
+- 用户明确要预约、修改或取消，信息齐全且符合规则就直接办，不审批，也不再问一遍。
+- 电脑和微信用同一个预约工具。工具锁住台账后，按设备编号、日期和半天检查冲突，写好新文件后一次替换旧文件。
+- 同一次提交重试时沿用原请求编号，返回原结果，不重复写台账或发邮件。新提交且时段没变，仍按修改办理。取消后重新预约也属于新请求。</div>
+            </div>
+            <p class="resource-row"><a class="resource-link" href="https://ethanhuang.cn/lab-reservations-seed.zip">原始数据包下载</a></p>
+          </div>
+          <div id="lean-panel" role="tabpanel" aria-labelledby="lean-tab" tabindex="0" hidden>
+            <div class="case-block">
+              <div class="case-bar">
+                <h2 class="case-title">基于 RAG 的云端知识库 kb-agent MCP 配置</h2>
+                <button class="case-copy" type="button">复制</button>
+              </div>
+              <pre class="case-text case-code"><code>{
+  "mcpServers": {
+    "kb-agent": {
+      "url": "https://kb.agent-mate.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer REPLACE_WITH_YOUR_KEY"
+      }
+    }
+  }
+}</code></pre>
+            </div>
+            <div class="case-block">
+              <div class="case-bar">
+                <h2 class="case-title">基于 RAG 的精益知识库：获得知识种子</h2>
+                <button class="case-copy" type="button">复制</button>
+              </div>
+              <div class="case-text"># 精益百科知识 RAG 知识库初始知识灌注提示词
+## S · Situation
+- `lean-expert/精益百科知识专家`是一个 WorkBuddy 本地专家，背后使用的是 kb-agent MCP: 云端的 RAG 知识库
+- 需要给 kb-agent 准备初始知识
+- 以下 15 条种子是起点：
+| 种子来源 |
+| --- |
+| [丰田汽车：丰田生产方式](https://global.toyota/en/company/vision-and-philosophy/production-system/) |
+| [The Machine That Changed the World](https://www.simonandschuster.com/books/Machine-that-Changed-the-World/James-P-Womack/9780892563500) |
+| [Toyota Production System（1988 英译版）](https://gatech.library.link/portal/CcFjl1gbPW4) |
+| [Lean Thinking](https://catalog.lib.fit.edu/cgi-bin/koha/opac-detail.pl?biblionumber=226492) |
+| [Learning to See](https://www.lean.org/store/book/learning-to-see/) |
+| [Today and Tomorrow（1926）](https://catalog.hathitrust.org/Record/000967078) |
+| [Motion Study（1911 书目）](https://searchworks.stanford.edu/view/2120356) |
+| [美国制造业的库存与流动时间](https://doi.org/10.6028/NIST.TN.1890) |
+| [离散制造精益技术综述](https://doi.org/10.3390/machines13040280) |
+| [汽车零件装配线快速换型与标准作业](https://doi.org/10.3390/eng4030134) |
+| [瓶颈对拉动生产机制的影响](https://doi.org/10.3390/app12031395) |
+| [均衡化生产（Heijunka）](https://www.lean.org/lexicon-terms/heijunka) |
+| [医疗价值流图研究](https://doi.org/10.3389/frhs.2025.1613756) |
+| [急诊科精益应用系统综述](https://doi.org/10.3390/healthcare9060763) |
+| [基层诊所流程改进研究](https://doi.org/10.1186/s12913-017-2364-3) |
+## T · Task
+筛选并补充英文知识源，首轮以 75 条可核验来源为目标。覆盖精益基础、价值流与指标、流动与拉动、标准化作业与设备、现场质量、日常管理、医疗与服务改进。
+## A · Action Role
+你是精益知识库研究员。先核对种子，再按缺口查找机构原始资料或同行评议研究。用代表性中文问题检查能否查定义、辨术语、算指标、选工具和判断案例结论。输出一张去重清单 lean-seeds.md：来源、链接、证据位置、能回答的问题、复用状态。另列仍缺证据的问题。
+## R · Rule
+- 优先选权威、免费可读的来源。只到目录或摘要的资料单列，不计入可核验来源数量。问题仍缺证据就继续补查，不能靠数量宣布够用。
+- 区分可复用正文、有条件复用、仅作参考。正文只把目标法域和具体版本已核实的公有领域或 CC0 材料列为可直接复用；署名许可或许可不明的来源单列。
+- 本次只筛选来源。不复制第三方原文、图表或模板，不写入 `kb-agent`。</div>
+            </div>
+            <div class="case-block">
+              <div class="case-bar">
+                <h2 class="case-title">智能体需求</h2>
+                <button class="case-copy" type="button">复制</button>
+              </div>
+              <div class="case-text">/expert-manager 我要构建一个 “精益百科知识专家”本地专家，使用云端 RAG 知识库`kb-agent MCP` 获得精益知识，再用问答的方式向用户提供专业解答</div>
+            </div>
+          </div>
+          <div id="materials-panel" role="tabpanel" aria-labelledby="materials-tab" tabindex="0" hidden>
+            <div class="case-block">
+              <div class="case-bar">
+                <h2 class="case-title">模拟 ERP 数据接口的外部 MCP</h2>
+                <button class="case-copy" type="button">复制</button>
+              </div>
+              <pre class="case-text case-code"><code>{
+  "mcpServers": {
+    "erp-mock": {
+      "url": "https://erp-mock.agent-mate.ai/mcp"
+    }
+  }
+}</code></pre>
+            </div>
+            <section class="case-build" aria-labelledby="materials-build-title">
+              <h2 id="materials-build-title">构建「关键物料缺料预警本地专家」步骤</h2>
+              <h3>第一步，<a class="resource-link" href="https://ethanhuang.cn/material-shortage-agent-building.zip">下载初始化文件</a></h3>
+              <p>压缩包内的内容</p>
+              <ul>
+                <li><code>req.md</code>：提供给 WorkBuddy 构建专家的需求说明。</li>
+                <li><code>material-shortage-alert-seedfile.zip</code>：工作区种子文件（种子数据、报告模板等）。不需要手动操作，交由 WorkBuddy 处理即可（见步骤 2）。</li>
+              </ul>
+              <h3>第二步，按下列步骤构建本地专家</h3>
+              <ol>
+                <li>在 WorkBuddy 中召唤「智能体设计师Ethan」专家，并加载 <code>expert-manager</code> 技能，附上 <code>req.md</code>，发送提示词：<strong>按照 req.md 构建本地专家「关键物料缺料预警专家」。</strong>按引导确认专家定义草稿和保存路径。</li>
+                <li>在同一对话中上传 <code>material-shortage-alert-seedfile.zip</code>，发送提示词：<strong>将上传的专家工作目录种子文件解压到本地专家工作目录，并把专家定义中的运行命令指向解压出的真实路径。</strong></li>
+                <li>按照引导完成本地专家的构建。</li>
+              </ol>
+            </section>
+            <div class="case-block">
+              <div class="case-bar">
+                <h2 class="case-title">关键物料缺料预警专家需求</h2>
+                <button class="case-copy" type="button">复制</button>
+              </div>
+              <div class="case-text"># 关键物料缺料预警专家：本地专家
+
+## 使用入口
+
+- 「关键物料缺料预警专家」是个人版 WorkBuddy 本地专家。学习者按本说明在 WorkBuddy 对话中构建自己的专家，并注册到本机「我的专家」。
+- 运行目录为 `expert/`，包含脚本、种子数据、数据目录、报告目录和上传暂存目录。教学套件中，该目录由 `material-shortage-alert-seedfile.zip` 解压产生；本机专家包中，即本说明所在目录。通过个人版 WorkBuddy 对话中调用专家使用。
+
+## 数据来源
+
+### 模拟 ERP 接口
+
+- workshop 使用公网 MCP 模拟 ERP 接口。连接器名 `erp-mock-mcp`，MCP 地址： `https://erp-mock.agent-mate.ai/mcp`。
+- `get_data` 接收 `file_name`，返回当前数据空间内该文件的最新版本，包括 `file_name`、`version`、`uploaded_at` 和 `data`。
+- `upload_data` 接收 `file_name` 和 `content`，按[上传校验要求](#upload_data-校验要求)校验后保存新版本。任一条件失败就返回错误，不写入新版本。
+
+`data/` 是运行目录下的本地数据目录，保存最近一次从模拟 ERP 取回的四份文件。`data-seeds/` 是只读种子目录，仅在初始化时使用。
+
+### 四份源文件与数量口径
+
+| 文件 | 内容与计算口径 |
+| --- | --- |
+| `materials.json` | 物料主数据。其他三份文件按 `material_id` 关联，单位以主数据为准。同名物料不合并。 |
+| `inventory.json` | 库存快照。workshop 将 `quantity` 视为 `snapshot_date` 当日结束时的可用量，不另扣占用。按料号合计同一快照日各仓库的可用量。 |
+| `work-orders.json` | 工单。纳入检查的工单以 `quantity` 表示 `requirement_date` 当天仍需领用的数量，不按工单原始总量计算。已完工工单不计需求。 |
+| `inbound.json` | 采购到货。对快照之后的确认到货，以 `quantity` 表示仍待收货的数量。`confirmed_arrival_date` 为空时不计供应，不用 `arrival_date` 代替。 |
+
+确认到货日早于或等于 `snapshot_date` 的记录视为已反映在库存中，不再加计。`uploaded_at` 是服务端保存版本的时间，既不是库存快照日期，也不是专家导入时间。
+
+## 工作职责
+
+专家承担三项工作。模拟 ERP 上传不会触发专家，不设定时任务。
+
+### 工作 1：初始化模拟 ERP 数据
+
+- 用户发起检查时，专家先探测模拟 ERP：四份文件全部返回「无版本」时，提示「模拟ERP MCP 服务当前无数据，执行初始化」，随即自动初始化，不需用户再次确认。
+- `get_data` 连接失败与「无数据」是两种结果：连接失败按取数失败处理，只有四份全部无版本才初始化。部分文件有版本时不初始化，按工作 2 继续。
+- 初始化从 `data-seeds/` 读取四份种子 JSON，逐份通过 `upload_data` 上传。成功后提示「初始化完成，4 份种子数据传入模拟ERP MCP 服务」。任一份上传失败时停止并说明。
+- 初始化不覆盖 `data/`；本地数据由工作 2 取数时更新。
+
+### 工作 2：取数、缺料检查与报告
+
+#### 第一步：获取最新四份 JSON
+
+- 用户发起检查即批准自动取数。专家用 `get_data` 分别读取四份文件，成功返回的四份就是本轮最新数据，不追踪服务端更新过程，不核对上传回执或批次。
+- 模拟 ERP 是经过校验的模拟数据接口，取回结果（含 `file_name`、`version`、`uploaded_at`、`data` 信封）直接覆盖 `data/` 中四个同名文件，导入时间以文件内 `uploaded_at` 为准，由报告版本表展示。
+- 任一文件取数失败时，专家指出文件和原因，不覆盖本地数据，也不用旧文件补齐或继续本轮检查。
+
+#### 第二步：批量检查缺料并生成 HTML 报告
+
+- 正式预警只纳入「已下达」工单。「计划中」和「已完工」不计入；其他状态视为数据异常，停止本轮并指出工单。
+- 检查范围为库存快照日之后至指定截止日，含截止日当天。截止日早于库存快照日时，请用户更正。快照日及以前仍待领用的已下达工单单列为「待核对」，不计入该期间的正式预警。
+- 同日先计到货，再按 `requirement_date` 和 `work_order_id` 分配。旧缺口不自动结转，未知到货日期不计供应。
+- 专家读取 [缺料预警 HTML 模板](reports/template/shortage-report-template.html)，将报告保存到 `reports/YYYYMMDD.html`。`YYYYMMDD` 是报告生成当天的本地日期，例如 `reports/20261121.html`。模板和输出路径均相对于本目录。
+- 模板只展示已计算结果；填入的外部文本须做 HTML 转义。无需求和有需求但无缺料分别说明，两种情况都生成报告。数据有缺失时不得给出「无缺料」结论。
+- 单料号查询作为追问入口。名称对应多个料号时，请用户先选料号。
+
+#### 第三步：在对话预览并发送邮件
+
+- 专家在 WorkBuddy 对话中提供可打开的本地 HTML 报告链接，并显示简要结果。
+- 收件人使用当前 WorkBuddy 已授权的「我的邮箱」（Agent Mail 地址），不从登录账号推断。专家展示收件人和附件，经用户确认后发送简短摘要，并附上与对话预览相同的 HTML 文件。不在邮件中发送本机路径。
+- 邮箱未开通、地址无法确认或邮件发送失败时，专家保留报告和对话预览，并单独说明邮件状态。
+
+### 工作 3：协助修改并上传数据
+
+- 用户通过 chat 上传手动修改后的 JSON 文件，不要求 4 份全部，任何一份或多份均可。
+- 专家将文件暂存到 `upload/` 目录，用脚本 `validate` 子命令校验数据和格式。
+- 格式类问题（缺字段、日期格式、数量类型）由专家直接修改并说明改了什么；业务数值改动（数量、日期、状态）先列出改动项，经用户确认再改。
+- 校验通过后，专家将 `upload/` 下的文件通过 `upload_data` 逐份上传。新增料号时先上传 `materials.json`，再上传引用该料号的其他文件。
+- 上传成功后提示用户，并询问是否立即执行工作 2 的缺料检查，不自动触发。
+
+### 工作流验收
+
+- 当前基线检查截至 2026 年 11 月 28 日。控制板 `M-1005` 的已下达工单 `WO-2026-1101` 需求为 50 块，库存为 36 块，无确认到货，报告应列出 11 月 28 日首次缺 14 块。
+- 查询「密封圈」时，专家应让学员在 `M-1006` 和 `M-1007` 中选一个料号。同日多工单和数据错误使用独立测试输入，不修改基线。
+- 验收时核对对话报告与邮箱收到的附件是否为同一份文件。
+
+## `upload_data` 校验要求
+
+`upload_data` 按下面的规则校验。任一条件失败就返回错误，不写入新版本。记录多出的字段会原样保留。
+
+### 文件级
+
+| 检查 | 通过条件 |
+| --- | --- |
+| 文件名 | 只能是 `materials.json`、`inventory.json`、`work-orders.json`、`inbound.json` |
+| 大小 | 不超过 2 MB |
+| JSON | 内容是合法 JSON |
+| 结构 | 顶层是对象，且含数组字段 `data` |
+| 记录数 | `data` 不超过 1000 条；每条是对象 |
+| `uploaded_at` | 可以不带。带了就必须是带时区、精确到秒的时间，例如 `2026-11-21T13:52:46+08:00`。服务保存时用服务器时间覆盖它 |
+
+### 各文件必填字段
+
+字符串必须是去空白后非空的字符串。日期必须是真实的 `YYYY-MM-DD`。
+
+| 文件 | 必填字段 | 数量 | 查重键 |
+| --- | --- | --- | --- |
+| `materials.json` | `material_id`、`material_name`、`unit` | 无 | `material_id` |
+| `inventory.json` | `material_id`、`warehouse`、`snapshot_date` | `quantity` 为数字，且大于或等于 0 | `material_id` + `warehouse` |
+| `work-orders.json` | `work_order_id`、`material_id`、`material_name`、`requirement_date`、`status` | `quantity` 为数字，且大于 0 | `work_order_id` |
+| `inbound.json` | `record_id`、`material_id`、`material_name`、`arrival_date` | `quantity` 为数字，且大于 0 | `record_id` |
+
+`inbound.json` 的 `confirmed_arrival_date` 必填，值可以是 `YYYY-MM-DD` 或 `null`。
+
+### 不视为错误
+
+- 两条记录的 `material_name` 相同。查重不用物料名称。
+- 记录里带有必填字段以外的字段，例如 `spec`、`supplier`、`category`。</div>
+            </div>
+            <section class="case-build" aria-labelledby="materials-update-title">
+              <h2 id="materials-update-title">模拟 ERP 侧的数据发生变化</h2>
+              <p>手动修改 json 文件后，在本地专家的 chat 对话框中上传修改后的文件，输入提示词：<strong>上传数据到 mcp</strong></p>
+            </section>
+          </div>
+        </section>
+
+        <section class="qr-block" aria-label="微信">
+          <img class="qr-image" src="images/wechat.png" alt="Ethan 的微信二维码" width="400" height="400">
+          <p class="qr-caption">扫码加我微信</p>
+        </section>
+
+        <footer class="site-footer">
+          <p>Copyright @ethanhuang</p>
+        </footer>
+      </article>
+    </main>
+  </div>
+  <script src="guide.js?v=case-tabs-3"></script>
+</body>
+</html>
