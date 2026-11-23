@@ -40,14 +40,111 @@
 
         <section class="case" aria-label="练习案例">
           <div class="case-tabs" role="tablist" aria-label="练习案例" hidden>
-            <button id="lab-tab" type="button" role="tab" aria-selected="true" aria-controls="lab-panel">实验室设备预约智能体</button>
+            <button id="hr-tab" type="button" role="tab" aria-selected="true" aria-controls="hr-panel">HR 政策百事通和年假智能体</button>
+            <button id="lab-tab" type="button" role="tab" aria-selected="false" aria-controls="lab-panel" tabindex="-1">实验室设备预约智能体</button>
             <button id="lean-tab" type="button" role="tab" aria-selected="false" aria-controls="lean-panel" tabindex="-1">精益百科专家智能体</button>
             <button id="materials-tab" type="button" role="tab" aria-selected="false" aria-controls="materials-panel" tabindex="-1">关键物料缺料预警智能体</button>
           </div>
-          <div id="lab-panel" role="tabpanel" aria-labelledby="lab-tab" tabindex="0">
+          <div id="hr-panel" role="tabpanel" aria-labelledby="hr-tab" tabindex="0">
+            <section class="case-build" aria-labelledby="hr-build-title">
+              <h2 id="hr-build-title">构建「HR 助理」本地专家的步骤</h2>
+              <h3>第一步，<a class="resource-link" href="https://ethanhuang.cn/hr-assistant-agent-seeds.zip">下载初始化文件</a></h3>
+              <p>压缩包内的内容</p>
+              <ul>
+                <li><code>data/employees-db.json</code>：模拟员工数据和年假台账。</li>
+                <li><code>data/company-policy.md</code>：模拟公司政策手册。</li>
+              </ul>
+              <h3>第二步，按下列步骤构建本地专家</h3>
+              <ol>
+                <li>在 WorkBuddy 中召唤「智能体设计师Ethan」专家，加载 <code>expert-manager</code> 技能。复制下方的需求，发送提示词：<strong>按以下需求构建本地专家「HR 助理」。</strong> 将需求粘贴在提示词下方，按引导确认专家定义草稿和保存路径。</li>
+                <li>构建完成后，在已绑定的 WorkBuddy 工作区召唤「HR 助理」，上传种子包并输入：<strong>初始化</strong>。</li>
+                <li>分别从桌面端和微信端直接召唤「HR 助理」，核对两个入口能否读取同一份模拟年假台账。</li>
+              </ol>
+            </section>
             <div class="case-block">
               <div class="case-bar">
-                <h2 class="case-title">智能体需求</h2>
+                <h2 class="case-title">HR 政策百事通和年假智能体需求</h2>
+                <button class="case-copy" type="button">复制</button>
+              </div>
+              <div class="case-text"># HR Assistant 本地专家
+当前工作区的 `hr-assistant-agent/` 存放模拟数据和种子包。本地专家包单独放在 WorkBuddy 专家注册目录，注册为单角色专家「HR 助理」，分类为「运营人力」。桌面端和微信端统一使用 `&lt;已绑定工作区&gt;/hr-assistant-agent/data/`，不在专家安装目录中保存请假记录。未绑定工作区时，助理先请用户指定工作区，不猜路径或新建第二份台账。
+## `hr-assistant-agent` 的目标
+这是一个智能体概念验证（POC），使用模拟数据，实现下面三类功能：
+1. 员工政策百事通问答助理。
+2. 查看剩余的假期。
+3. 提交请假申请（POC 自动审批）。
+## Input
+### 已绑定工作区的 `hr-assistant-agent/data/` 包含两个文件
+1. `data/employees-db.json`
+2. `data/company-policy.md`
+### 专家构建完成后，将初始文件打包为 `hr-assistant-agent-seeds.zip`
+1. 只制作一份种子包，包含上述两个初始文件，不包含脚本或运行后新增的请假记录。本地验收和跨机器分享使用同一个种子包。跨机器分享前确认云端地址和下载权限，再上传该种子包。
+2. 收件人安装专家后，在自己的 WorkBuddy 工作区手动说「初始化」。专家将种子文件安装到该工作区的 `hr-assistant-agent/data/`。再次初始化只补缺失文件，不覆盖已有数据。找不到种子包时，助理请用户提供该种子包，不现场生成数据。
+3. 初始化和年假台账脚本随专家包交付。初始化脚本校验种子包后安装数据，不执行种子包中的内容。台账脚本负责日期计算、校验和写入。用于生成模拟数据或重建种子包的脚本只放在构建目录，不随种子包交付。
+## Requirement
+### 使用入口
+1. 用户可以通过 WorkBuddy 直接召唤专家，在对话中使用。
+2. 用户也可以用 WorkBuddy 助理绑定微信后，在微信对话中直接召唤专家。微信直接召唤是首版验收的硬条件。先验证微信能直接召唤本专家并读取指定工作区的模拟数据，再验证微信和桌面端能查询、提交并看到同一份台账中的更新。只能续聊桌面端已启动的会话不算通过。
+### 功能
+#### 公司政策百事通
+##### 问答助理
+用户输入问题后，助理从已绑定工作区的 `hr-assistant-agent/data/company-policy.md` 查找答案，在对话中回答并引用政策编号和条款。缺少影响结论的信息时，先追问。
+##### 公司政策：以现有文件为基础扩充
+来源：[mock-hr-policies.md](../../sample-agents/hr-assistant/mock-data/mock-hr-policies.md)。
+1. 增加上海、北京、成都、新加坡、东京和伦敦的模拟差旅标准。写清航班舱位条件、住宿每晚限额、餐补每日标准、币种和未列城市的处理方式。短期差旅与跨城搬迁标准分开。
+2. 扩充试用期、报销、证明开具等常见问答，每条答案对应手册条款。
+3. 手册可读取但找不到答案时，回复：“员工手册中目前没有相关的规定，请咨询 HR。” 手册缺失或读取失败时，说明数据不可用。
+#### 查询个人假期
+##### 数据源
+`data/employees-db.json` 预设 20 位虚构员工，假期只涵盖年假。模拟数据依据 `data/company-policy.md` 制作，覆盖无请假记录、零余额、年中入职、离职后复聘和已有未来请假等场景。手册不再预设默认员工或固定个人余额，个人年假信息以台账为准。
+##### 员工选择
+用户提出假期查询后，助理先提示：「这是 HR 助理 POC，不做真实的身份验证，请说明要查询哪一位员工的年假信息。」然后按数字序号列出 20 位员工，接受序号或姓名。
+##### 请假详细数据
+1. 列出该员工在 2026 年演示周期享有的年假总天数。查询和请假统一以北京时间 `2026-11-22` 为演示日期，不按电脑当天判断，首版不自动跨年。助理将此日期标明为模拟日期。
+2. 逐笔列出请假记录，包括提交时间、事由、休假起始日期、结束日期和天数。
+3. 列出剩余年假天数。年度额度、请假记录和余额须能核对。
+法定年假使用预设的模拟核定值，企业补充年假按手册计算。模拟核定值不代表真实法定标准。
+#### 请假
+##### 员工选择
+用户提出请假后，助理先提示：「这是 HR 助理 POC，不做真实的身份验证，请说明要以哪位员工的身份请假。」然后按数字序号列出 20 位员工，接受序号或姓名。
+##### 提交请假
+1. 先展示该员工的请假详细数据，格式与「查询个人假期」相同。
+2. 依次询问三个问题：请问您请假的起始日期？请几天？事由？事由可填「个人安排」或「不提供」，不要求私人细节。请假草稿仅在当前会话有效，用户取消或改选员工时，助理清空草稿。
+3. 首版只接受晚于演示日期 `2026-11-22`、且在 2026 年内结束的整工作日申请。模拟工作日为周一至周五，不套用真实节假日和调休。起始日不是工作日、申请跨年、与已有请假重叠或余额不足时，说明原因，不写入台账。
+4. 扣减时先使用较早到期的年假账户；同一天到期时，先扣法定年假。
+5. 台账脚本对同一台账加写入锁，在锁内重新读取、校验和保存，防止桌面端与微信端同时提交时互相覆盖。同一员工、同一起始日和天数的申请重复提交时，返回原申请编号，不再扣减。新申请校验通过后直接写入，无需二次确认。
+6. 写入成功后回复「模拟审批通过」，并列出申请编号、实际休假起止日期和新余额。校验或写入失败时，说明原因，不提示审批通过。
+## 智能体开工前的初始化工作
+1. 以 `mock-hr-policies.md` 为基础扩充 `data/company-policy.md`，补齐差旅条款和常见问答，移除旧员工表引用及默认员工答案。
+2. 构建 `data/employees-db.json`，为 20 位虚构员工准备不同场景的年假记录。
+3. 将两个初始文件打包为同一份 `hr-assistant-agent-seeds.zip`。
+## 首版验收
+1. 在干净的工作区手动发起「初始化」，验证两个文件可用。重复初始化只补缺失文件，不改变已有台账。
+2. 在桌面端与微信端分别直接召唤专家，完成查询、请假和再次查询，验证两端使用同一份台账。
+3. 验证余额不足、日期重叠的申请不会改变台账；重复提交返回原申请编号且不重复扣减。
+4. 验证两端同时提交时，台账保留所有成功记录，被拒绝的申请不改变余额。</div>
+            </div>
+          </div>
+          <div id="lab-panel" role="tabpanel" aria-labelledby="lab-tab" tabindex="0" hidden>
+            <section class="case-build" aria-labelledby="lab-build-title">
+              <h2 id="lab-build-title">构建「实验室设备助理」本地专家的步骤</h2>
+              <h3>第一步，<a class="resource-link" href="https://ethanhuang.cn/lab-reservations-seed.zip">下载初始化文件</a></h3>
+              <p>压缩包内的内容</p>
+              <ul>
+                <li><code>data/lab-equipments.json</code>：模拟设备清单。</li>
+                <li><code>data/people.json</code>：模拟人员名单。</li>
+                <li><code>data/reservations.json</code>：预约台账。</li>
+              </ul>
+              <h3>第二步，按下列步骤构建本地专家</h3>
+              <ol>
+                <li>在 WorkBuddy 中召唤「智能体设计师Ethan」专家，加载 <code>expert-manager</code> 技能。复制下方的需求，发送提示词：<strong>按以下需求构建本地专家「实验室设备助理」，专家目录命名为 lab-mgmt-expert。</strong> 将需求粘贴在提示词下方，按引导确认专家定义草稿和保存路径。</li>
+                <li>在同一对话中上传 <code>lab-reservations-seed.zip</code>，发送提示词：<strong>将压缩包中的 data/ 解压到本地专家工作目录，保留已有设备、人员和预约数据，不要用初始文件覆盖。</strong></li>
+                <li>按引导完成构建，在「我的专家」中打开「实验室设备助理」，查询一台设备的空闲时段。</li>
+              </ol>
+            </section>
+            <div class="case-block">
+              <div class="case-bar">
+                <h2 class="case-title">实验室设备预约专家需求</h2>
                 <button class="case-copy" type="button">复制</button>
               </div>
               <div class="case-text"># 实验室设备预约：本地专家
@@ -80,7 +177,6 @@
 - 电脑和微信用同一个预约工具。工具锁住台账后，按设备编号、日期和半天检查冲突，写好新文件后一次替换旧文件。
 - 同一次提交重试时沿用原请求编号，返回原结果，不重复写台账或发邮件。新提交且时段没变，仍按修改办理。取消后重新预约也属于新请求。</div>
             </div>
-            <p class="resource-row"><a class="resource-link" href="https://ethanhuang.cn/lab-reservations-seed.zip">原始数据包下载</a></p>
           </div>
           <div id="lean-panel" role="tabpanel" aria-labelledby="lean-tab" tabindex="0" hidden>
             <div class="case-block">
